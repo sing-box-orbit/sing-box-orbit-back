@@ -1,8 +1,8 @@
-import { betterAuth } from 'better-auth'
-import { prismaAdapter } from 'better-auth/adapters/prisma'
-import { admin, bearer, jwt, username } from 'better-auth/plugins'
-import { appConfig } from '@/libs/appConfig'
-import { db } from '@/libs/db'
+import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { admin, bearer, jwt, username } from 'better-auth/plugins';
+import { appConfig } from '@/libs/appConfig';
+import { db } from '@/libs/db';
 
 export const auth = betterAuth({
 	database: prismaAdapter(db, {
@@ -15,8 +15,8 @@ export const auth = betterAuth({
 		enabled: true,
 	},
 	session: {
-		expiresIn: 60 * 60 * 24 * 7, // 7 days
-		updateAge: 60 * 60 * 24, // 1 day
+		expiresIn: 60 * 60 * 24 * 7,
+		updateAge: 60 * 60 * 24,
 	},
 	plugins: [admin(), bearer(), jwt(), username()],
-})
+});

@@ -1,8 +1,9 @@
-import type { auth } from '@/libs/auth/auth'
+import type { auth } from '@/libs/auth/auth';
 
-type AuthSession = typeof auth.$Infer.Session
+type AuthSession = typeof auth.$Infer.Session;
 
 export type AppVariables = {
-	user: AuthSession['user'] | null
-	session: AuthSession['session'] | null
-}
+	user: AuthSession['user'] | null;
+	session: AuthSession['session'] | null;
+	requestId: string;
+};

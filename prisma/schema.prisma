@@ -86,3 +86,124 @@ model Jwks {
 
   @@map("jwks")
 }
+
+// ============================================
+// Sing-Box Orbit Models
+// ============================================
+
+enum ServerStatus {
+  ONLINE
+  OFFLINE
+  SYNCING
+  ERROR
+}
+
+enum InboundType {
+  VLESS
+  VMESS
+  TROJAN
+  SHADOWSOCKS
+  HYSTERIA2
+  TUIC
+  NAIVE
+  SHADOWTLS
+}
+
+model Server {
+  id         String       @id @default(cuid())
+  name       String
+  url        String
+  apiToken   String
+  status     ServerStatus @default(OFFLINE)
+  location   String?
+  lastSyncAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  inbounds      Inbound[]
+  clientServers ClientServer[]
+
+  @@map("server")
+}
+
+model Inbound {
+  id           String      @id @default(cuid())
+  serverId     String
+  server       Server      @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  suiInboundId Int
+  tag          String
+  type         InboundType
+  port         Int
+  enabled      Boolean     @default(true)
+  settings     Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([serverId, suiInboundId])
+  @@index([serverId])
+  @@map("inbound")
+}
+
+model Client {
+  id                     String                @id @default(cuid())
+  username               String                @unique
+  email                  String?
+  enabled                Boolean               @default(true)
+  expiresAt              DateTime?
+  subscriptionTemplateId String?
+  subscriptionTemplate   SubscriptionTemplate? @relation(fields: [subscriptionTemplateId], references: [id], onDelete: SetNull)
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+
+  servers      ClientServer[]
+  subscription Subscription?
+
+  @@index([subscriptionTemplateId])
+  @@map("client")
+}
+
+model ClientServer {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  serverId    String
+  server      Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  suiClientId Int
+  uuid        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([clientId, serverId])
+  @@index([clientId])
+  @@index([serverId])
+  @@map("client_server")
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  token     String   @unique @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscription")
+}
+
+model SubscriptionTemplate {
+  id             String   @id @default(cuid())
+  name           String   @unique
+  profileTitle   String?
+  updateInterval Int      @default(24)
+  updateAlways   Boolean  @default(false)
+  announce       String?
+  announceUrl    String?
+  routing        String?
+  trafficTotal   BigInt   @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  clients Client[]
+
+  @@map("subscription_template")
+}

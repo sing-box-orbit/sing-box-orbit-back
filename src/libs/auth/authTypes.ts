@@ -1,3 +1,3 @@
-import type { auth } from '@/libs/auth/auth'
+import type { auth } from '@/libs/auth/auth';
 
-export type AuthSession = typeof auth.$Infer.Session
+export type AuthSession = typeof auth.$Infer.Session;
