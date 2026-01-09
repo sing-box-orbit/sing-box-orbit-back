@@ -1,4 +1,15 @@
-import { cleanEnv, num, str } from 'envalid';
+import { cleanEnv, makeValidator, num, str } from 'envalid';
+
+const optionalEmail = makeValidator<string>((input) => {
+	if (!input || input.trim() === '') {
+		return 'admin@admin.com';
+	}
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	if (!emailRegex.test(input)) {
+		throw new Error(`Invalid email address: "${input}"`);
+	}
+	return input;
+});
 
 export const appConfig = cleanEnv(process.env, {
 	APP_PORT: num(),
@@ -8,7 +19,7 @@ export const appConfig = cleanEnv(process.env, {
 	BETTER_AUTH_SECRET: str(),
 	TRUSTED_ORIGINS: str(),
 	COOKIE_DOMAIN: str(),
-	ADMIN_EMAIL: str({ default: '' }),
+	ADMIN_EMAIL: optionalEmail({ default: 'admin@admin.com' }),
 	ADMIN_PASSWORD: str({ default: '' }),
 });
 

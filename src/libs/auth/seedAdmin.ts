@@ -11,6 +11,8 @@ function generatePassword(length = 16): string {
 	return Array.from(randomBytes, (byte) => charset[byte % charset.length]).join('');
 }
 
+const MIN_PASSWORD_LENGTH = 8;
+
 export async function seedAdmin() {
 	const adminUser = await db.user.findFirst({
 		where: { role: 'admin' },
@@ -20,9 +22,13 @@ export async function seedAdmin() {
 		return;
 	}
 
-	const email = appConfig.ADMIN_EMAIL || 'admin@admin.com';
+	const email = appConfig.ADMIN_EMAIL;
 	const password = appConfig.ADMIN_PASSWORD || generatePassword();
 	const isGeneratedPassword = !appConfig.ADMIN_PASSWORD;
+
+	if (appConfig.ADMIN_PASSWORD && appConfig.ADMIN_PASSWORD.length < MIN_PASSWORD_LENGTH) {
+		throw new Error(`ADMIN_PASSWORD must be at least ${MIN_PASSWORD_LENGTH} characters long`);
+	}
 
 	await auth.api.signUpEmail({
 		body: {
